@@ -1,59 +1,43 @@
-import sqlite3
+#import sqlite3
+#con = sqlite3.connect("db")
+class JuegoCarreras:    #Clase padre para juegos de carreras, contiene datos privados y su inicializacion
+  __id=0
+  __jugadores = []
+  __pistas = []
+  __vehiculos = []
+  __recorrido = []
 
-con = sqlite3.connect("db")
+  def Iniciarjuego(self):
+    pass
 
-class Juego:
-  jugadores = []
-  pistas = ["Recta", "curvas", "mixta"]
-  carros = []
-  carriles = []
+class CarreraCarros(JuegoCarreras):   #Heredando de JuegoCarreras, crea una carrera de carros
+  def __init__(self):
+    self.__pistas = [["Arena",1], ["Asfalto", 1.5], ["Nieve", 2]]
 
+class JugarCarrera:   #Operacion de un juego de carreras
+  def moverVehiculo(self):
+    pass
+
+  def evaluarGanador(self):
+    pass
+
+class Imprimir:   #Impresiones genericas para un juego de carreras
+  __DATA = [''' 
+       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+       %%%%%                           */¨\*   %%%%%  
+       %%%  */¨\*                       (3)     %%%  
+       %%    (7)           */¨\*       *\./*    %%
+     %% ====*\./*==|WELCOME TO RECE|========== %%
+    %%  */¨\*     (4)      *\./*  */¨\*      %%   
+   %%%   (1)     *\./*             (9)      %%%         
+  %%%%% *\./*                     *\./*  %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%''']
+
+
+  def imprimir(self):
+    print(self.__DATA[0])
 
 if __name__ == '__main__':
-  main:
-  
-
-       ###############################################
-       #####                           */¨\*   #####  
-       ###  */¨\*                       (3)     ###  
-       ##    (7)           */¨\*       *\./*    ##
-     ## ====*\./*==|WELCOME TO RECE|========== ##
-    ##  */¨\*     (4)      *\./*  */¨\*      ##   
-   ###   (1)     *\./*             (9)      ###         
-  ##### *\./*                     *\./*  ######
-###############################################
-
-
-       ###############################################
-       #####                           */¨\*   #####  
-       ###  */¨\*                       (3)     ###  
-       ##    (7)           */¨\*       *\./*    ##
-     ## ~~~~*\./*~~|WELCOME TO RECE|~~~~~~~~~~ ##
-    ##  */¨\*     (4)      *\./*  */¨\*      ##   
-   ###   (1)     *\./*             (9)      ###         
-  ##### *\./*                     *\./*  ######
-###############################################
-
-
-
-#       0000000000000000000000000000000000000000000000
- #      00000                           */¨\*   00000  
- #      000  */¨\*                       (3)     000  
- #      00    (7)           */¨\*       *\./*    00
- #    00 ~~~~*\./*~~|WELCOME TO RECE|~~~~~~~~~~ 00
- #   00  */¨\*     (4)      *\./*  */¨\*      00   
- #  000   (1)     *\./*             (9)      000         
- # 00000 *\./*                     *\./*  000000
-#00000000000000000000000000000000000000000000000
-
-
-
-#       XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
- #      XXXXX                           */¨\*   XXXXX  
- #      XXX  */¨\*                       (3)     XXX  
- #      XX    (7)           */¨\*       *\./*    XX
- #    XX ~~~~*\./*~~|WELCOME TO RECE|~~~~~~~~~~ XX
- #   XX  */¨\*     (4)      *\./*  */¨\*      XX   
- #  XXX   (1)     *\./*             (9)      XXX         
- # XXXXX *\./*                     *\./*  XXXXXX
-#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  imp=Imprimir()
+  imp.imprimir() 
+ 
