@@ -1,3 +1,5 @@
+#JUEGO DE CARRERA DE CARROS v.1
+#Saider Lagares, Mayo 2021
 from random import randint
 import sqlite3
     
