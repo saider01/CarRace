@@ -1,7 +1,7 @@
 from random import randint
 import sqlite3
     
-class Vehiculo:   #Vehiculo generico para carreras
+class Vehiculo:     #Vehiculo generico para carreras
   __distancia = 0   #recorrido actual en la carrera
   __carril = 0
   __numero = []
@@ -64,7 +64,6 @@ class Guardar:
     except:
       print("Database Error")
      
-
   @staticmethod
   def guardar(con, cur, podio):
     cur.execute("CREATE TABLE IF NOT EXISTS partidas(id integer PRIMARY KEY, primero text, segundo text, tercero text)")
@@ -74,14 +73,12 @@ class Guardar:
   @staticmethod
   def consultar():    #Imprime historico de resultados
     con, cur = Guardar.iniciarDb()
-    cur.execute("SELECT * FROM partidas")
-    print("Id\tprimero\t\tsegundo\t\ttercero\n")
+    cur.execute("SELECT * FROM partidas ORDER BY id DESC LIMIT 5")    #Tomando las 5 ultimas filas de la tabla partidas
+    print("\n\tResultados en las ultimas 5 partidas\nId\tprimero\t\tsegundo\t\ttercero\n")
     [print(f"{row[0]}\t{row[1]}\t{row[2]}\t{row[3]}") for row in cur.fetchall()]
     print("\n")
 
-
 class CarreraCarros():
-  __id = 0
   __pistas = Pista(["Asfalto","Arena", "Nieve"], 1500,[1,2,3])
   __pistaUso = ""
   __podio = []
@@ -95,13 +92,10 @@ class CarreraCarros():
       self.__jugadores[i].setVehiculo(self.__carros[i].getNumero())
 
   def setPista(self, pis):
-    self.__pistaUso = self.__pistas.getTipo()[pis-1]
+    self.__pistaUso = self.__pistas.getTipo()[pis-1]      #carga pista que se usara para luego determinar dificultad de esta
   
   def getPistas(self):
     return self.__pistas.getTipo()
-
-  def getPodio(self):
-    return self.__podio
 
   def jugar(self):                                                          # Asigna de 100m-600m de avance a cada vehiculo
     longitudPista = self.__pistas.getLongitud()
@@ -112,46 +106,46 @@ class CarreraCarros():
           if self.__jugadores[i].getNombre() not in self.__podio:           #   Y ademas no esta conductor en podio
             self.__podio.append(self.__jugadores[i].getNombre())            #     LLeve el conductor al podio
         else:                                                               
-          self.__carros[i].setDistancia(100*randint(1,self.__pistas.getDificultad(self.__pistaUso)))  # Sino haga avance aleatorio con dificultad
-    if len(self.__podio) < 3:                                               # Cuando hay 2 jugadores el 3er lugar se llena con espacio 
-      self.__podio.append(" ")
+          self.__carros[i].setDistancia(100*randint(1,self.__pistas.getDificultad(self.__pistaUso)))  # Sino, haga avance aleatorio con dificultad
+    if len(self.__podio) < 3:                                               # Cuando hay 2 jugadores el 3er lugar se llena con "vacio" 
+      self.__podio.append("vacio")
     con, cur = Guardar.iniciarDb()
     Guardar.guardar(con, cur, self.__podio)                                 # El orden de __podio es el orden de llegada
 
   def ganadores(self):
-    print(f''' 
-       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                        GANADORES
-        ((( 1 )))===\t\t{self.__podio[0]}     
-        ((( 2 )))=====\t\t{self.__podio[1]}  
-        ((( 3 )))=======\t{self.__podio[2]}
-       ==============================================
-                    ''')
-
-def validar(valor):
+    jugadores = [self.__jugadores[i].getNombre() for i in range(len(self.__jugadores))]
+    indexPrimero = jugadores.index(self.__podio[0])
+    indexSegundo = jugadores.index(self.__podio[1])
+    indexTercero = -1 if len(self.__jugadores) < 3 else jugadores.index(self.__podio[2])
+    carroTercero = 0 if len(self.__jugadores) < 3 else self.__carros[indexTercero].getNumero()
+    print(f'''                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                                  GANADORES
+                                       Jugador        Carril         Carro                  
+                  ((( 1 )))===\t\t{self.__podio[0]}.........{indexPrimero+1}.........{self.__carros[indexPrimero].getNumero()}      
+                  ((( 2 )))=====\t{self.__podio[1]}.........{indexSegundo+1}.........{self.__carros[indexSegundo].getNumero()}  
+                  ((( 3 )))=======\t{self.__podio[2]}.........{indexTercero+1}.........{carroTercero}  
+              ===============================================''')
+                    
+def validar(valor):         #Evita fallos por ingresar valores errados al inicio
   if valor.isnumeric():
     return 1 if int(valor) not in [1,2,3,4] else int(valor)
   else:
     return 1
 
 if __name__ == '__main__':
-  print(''' 
-       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-       %%%%%                           */¨\*   %%%%%  
-       %%%  */¨\*                       (3)     %%%  
-       %%    (7)           */¨\*       *\./*    %%
-     %% ====*\./*=|CARRERAS DE CARROS|======== %%
-    %%  */¨\*     (4)      *\./*  */¨\*      %%   
-   %%%   (1)     *\./*             (9)      %%%         
-  %%%%% *\./*                     *\./*  %%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%''')
+  print('''           %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/¨\*%%%%%%%%  
+           %%%  */¨\*                       (3)     %%%  
+           %%    (7)           */¨\*       *\./*    %%
+         %% ====*\./*=|CARRERAS DE CARROS|======== %%
+        %%  */¨\*     (4)      *\./*  */¨\*      %%   
+       %%%   (1)     *\./*             (9)      %%%         
+      %%%%% *\./*%%%%%%%%%%%%%%%%%%%%%*\./*%%%%%%%%''')
+
   menu = int(input(f"\t\t\tMENU\n(1) Jugar\n(2) Ver Ganadores\n"))
   if menu == 1:
     jugadorHumanoLen = validar(input("\nIngrese numero de jugadores humanos [1-4]: "))
-    #jugadorHumanoLen = 1 if jugadorHumanoLen not in [1,2,3,4] else jugadorHumanoLen
     jugadorHumano = [input(f"Jugador humano {i}: ") for i in range(jugadorHumanoLen)]
     jugadorMaquinaLen = validar(input("Ingrese numero de jugadores maquina [1-4]: "))
-    #jugadorMaquinaLen = 4 if jugadorMaquinaLen not in [1,2,3,4] else jugadorMaquinaLen
     jugadorMaquina = ["jugador"+str(i) for i in range(jugadorMaquinaLen)]
     carrera = CarreraCarros(jugadorHumano+jugadorMaquina)
     pistas = carrera.getPistas()
