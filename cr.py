@@ -22,13 +22,21 @@ class Vehiculo:   #Vehiculo generico para carreras
 class Pista:    #Pista generica para careras
   __tipoPistas = ""
   __longitud = 0
+  __dificultad =  []
 
-  def __init__(self, nom, lon):
+  def __init__(self, nom, lon, dif):
     self.__tipoPistas = nom
     self.__longitud = lon
+    self.__dificultad = dif
 
   def getLongitud(self):
     return self.__longitud
+
+  def getDificultad(self, pista):
+    return self.__dificultad[self.__tipoPistas.index(pista)]
+  
+  def getTipo(self):
+    return self.__tipoPistas
 
 class Jugador:    #Jugador generico para carreras
   __vehiculo = 0  #Numero del vehiculo asignado
@@ -64,7 +72,7 @@ class Guardar:
     con.commit()
 
   @staticmethod
-  def consultar():    #Imprime tabla de resultados
+  def consultar():    #Imprime historico de resultados
     con, cur = Guardar.iniciarDb()
     cur.execute("SELECT * FROM partidas")
     print("Id\tprimero\t\tsegundo\t\ttercero\n")
@@ -74,31 +82,51 @@ class Guardar:
 
 class CarreraCarros():
   __id = 0
-  __pistas = Pista(["Arena","Asfalto", "Nieve"], 1500)
+  __pistas = Pista(["Asfalto","Arena", "Nieve"], 1500,[1,2,3])
+  __pistaUso = ""
   __podio = []
 
   def __init__(self, jug):    #Crea vehiculos(asigna numero y carril) y jugadores(asigna vehiculo y nombre)
     jugadoresLen = len(jug)   #Cuantos jugadores hay en total
-    self.__vehiculos = [Vehiculo(randint(0,99), i) for i in range(jugadoresLen)]
+    self.__carros = [Vehiculo(randint(0,99), i) for i in range(jugadoresLen)]
     self.__jugadores = [Jugador(0, "") for i in range(jugadoresLen)]
     for i in range(jugadoresLen):
       self.__jugadores[i].setNombre(jug[i])
-      self.__jugadores[i].setVehiculo(self.__vehiculos[i].getNumero())
+      self.__jugadores[i].setVehiculo(self.__carros[i].getNumero())
+
+  def setPista(self, pis):
+    self.__pistaUso = self.__pistas.getTipo()[pis-1]
+  
+  def getPistas(self):
+    return self.__pistas.getTipo()
+
+  def getPodio(self):
+    return self.__podio
 
   def jugar(self):                                                          # Asigna de 100m-600m de avance a cada vehiculo
     longitudPista = self.__pistas.getLongitud()
     maxPodios = 3 if len(self.__jugadores) > 3 else len(self.__jugadores)-1 # Verificar si hay 2 o mas jugadores para asignar en podio 
     while len(self.__podio) <= maxPodios:                                   # Iterar para verificar ganadores
-      for i in range(len(self.__vehiculos)):                                # Iterar sobre cada vehiculo (tirar dado)
-        if self.__vehiculos[i].getDistancia() >= longitudPista:             # Si vehiculo supero la meta
+      for i in range(len(self.__carros)):                                   # Iterar sobre cada vehiculo (tirar dado)
+        if self.__carros[i].getDistancia() >= longitudPista:                # Si vehiculo supero la meta
           if self.__jugadores[i].getNombre() not in self.__podio:           #   Y ademas no esta conductor en podio
             self.__podio.append(self.__jugadores[i].getNombre())            #     LLeve el conductor al podio
         else:                                                               
-          self.__vehiculos[i].setDistancia(100*randint(1,6))                # Sino haga avance aleatorio a vehiculo (100m-600m)
+          self.__carros[i].setDistancia(100*randint(1,self.__pistas.getDificultad(self.__pistaUso)))  # Sino haga avance aleatorio con dificultad
     if len(self.__podio) < 3:                                               # Cuando hay 2 jugadores el 3er lugar se llena con espacio 
       self.__podio.append(" ")
     con, cur = Guardar.iniciarDb()
     Guardar.guardar(con, cur, self.__podio)                                 # El orden de __podio es el orden de llegada
+
+  def ganadores(self, pod):
+    print(f''' 
+       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                        GANADORES
+        ((( 1 )))===\t\t{pod[0]}     
+        ((( 2 )))=====\t\t{pod[1]}  
+        ((( 3 )))=======\t{pod[2]}
+       ==============================================
+                    ''')
 
 if __name__ == '__main__':
   print(''' 
@@ -120,8 +148,9 @@ if __name__ == '__main__':
     jugadorMaquinaLen = 4 if jugadorMaquinaLen not in [1,2,3,4] else jugadorMaquinaLen
     jugadorMaquina = ["jugador"+str(i) for i in range(jugadorMaquinaLen)]
     carrera = CarreraCarros(jugadorHumano+jugadorMaquina)
+    pistas = carrera.getPistas()
+    carrera.setPista(int(input(f"\nSeleccione pista:\n\n(1) {pistas[0]}\n(2) {pistas[1]}\n(3) {pistas[2]}\n")))
     carrera.jugar()
+    carrera.ganadores(carrera.getPodio())
   if menu == 2:
     Guardar.consultar()
-
-  
