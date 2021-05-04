@@ -118,15 +118,21 @@ class CarreraCarros():
     con, cur = Guardar.iniciarDb()
     Guardar.guardar(con, cur, self.__podio)                                 # El orden de __podio es el orden de llegada
 
-  def ganadores(self, pod):
+  def ganadores(self):
     print(f''' 
        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                         GANADORES
-        ((( 1 )))===\t\t{pod[0]}     
-        ((( 2 )))=====\t\t{pod[1]}  
-        ((( 3 )))=======\t{pod[2]}
+        ((( 1 )))===\t\t{self.__podio[0]}     
+        ((( 2 )))=====\t\t{self.__podio[1]}  
+        ((( 3 )))=======\t{self.__podio[2]}
        ==============================================
                     ''')
+
+def validar(valor):
+  if valor.isnumeric():
+    return 1 if int(valor) not in [1,2,3,4] else int(valor)
+  else:
+    return 1
 
 if __name__ == '__main__':
   print(''' 
@@ -141,16 +147,16 @@ if __name__ == '__main__':
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%''')
   menu = int(input(f"\t\t\tMENU\n(1) Jugar\n(2) Ver Ganadores\n"))
   if menu == 1:
-    jugadorHumanoLen = int(input("\nIngrese numero de jugadores humanos [1-4]: ")) 
-    jugadorHumanoLen = 1 if jugadorHumanoLen not in [1,2,3,4] else jugadorHumanoLen
+    jugadorHumanoLen = validar(input("\nIngrese numero de jugadores humanos [1-4]: "))
+    #jugadorHumanoLen = 1 if jugadorHumanoLen not in [1,2,3,4] else jugadorHumanoLen
     jugadorHumano = [input(f"Jugador humano {i}: ") for i in range(jugadorHumanoLen)]
-    jugadorMaquinaLen = int(input("Ingrese numero de jugadores maquina [1-4]: "))
-    jugadorMaquinaLen = 4 if jugadorMaquinaLen not in [1,2,3,4] else jugadorMaquinaLen
+    jugadorMaquinaLen = validar(input("Ingrese numero de jugadores maquina [1-4]: "))
+    #jugadorMaquinaLen = 4 if jugadorMaquinaLen not in [1,2,3,4] else jugadorMaquinaLen
     jugadorMaquina = ["jugador"+str(i) for i in range(jugadorMaquinaLen)]
     carrera = CarreraCarros(jugadorHumano+jugadorMaquina)
     pistas = carrera.getPistas()
     carrera.setPista(int(input(f"\nSeleccione pista:\n\n(1) {pistas[0]}\n(2) {pistas[1]}\n(3) {pistas[2]}\n")))
     carrera.jugar()
-    carrera.ganadores(carrera.getPodio())
+    carrera.ganadores()
   if menu == 2:
     Guardar.consultar()
